@@ -2,11 +2,12 @@
 
 from fastapi import FastAPI, HTTPException
 
-from src.models import ReservaCreate, ReservaResponse
+from src.models import ReservaCreate, ReservaResponse, SalaResponse
 from src.services import ConflictoError, _reset
 from src.services import cancelar_reserva as cancelar_reserva_service
 from src.services import crear_reserva as crear_reserva_service
 from src.services import listar_reservas as listar_reservas_service
+from src.services import listar_salas as listar_salas_service
 from src.services import obtener_reserva as obtener_reserva_service
 
 app = FastAPI(
@@ -19,6 +20,12 @@ app = FastAPI(
 def health_check() -> dict[str, str]:
     """Health check endpoint."""
     return {"status": "ok"}
+
+
+@app.get("/api/v1/salas", response_model=list[SalaResponse])
+def listar_salas() -> list[SalaResponse]:
+    """Lista las salas disponibles con sus capacidades máximas."""
+    return listar_salas_service()
 
 
 @app.post("/api/v1/reservas", response_model=ReservaResponse, status_code=201)
