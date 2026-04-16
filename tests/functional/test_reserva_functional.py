@@ -33,9 +33,13 @@ def sistema_gestiona_salas(datatable: list[list[str]], api_client: httpx.Client)
     )
     response = api_client.get("/api/v1/salas")
     assert response.status_code == 200, f"GET /api/v1/salas falló: {response.status_code}"
-    salas_api = {s["sala"]: s["capacidad"] for s in response.json()}
+    datos_api = response.json()
+    salas_api = {s["sala"]: s["capacidad"] for s in datos_api}
+    assert set(salas_api.keys()) == set(SALAS_ESPERADAS), (
+        f"Conjunto de salas incorrecto. "
+        f"Esperado: {set(SALAS_ESPERADAS)}, obtenido: {set(salas_api.keys())}"
+    )
     for sala, capacidad in SALAS_ESPERADAS.items():
-        assert sala in salas_api, f"Sala {sala} no encontrada en la API"
         assert salas_api[sala] == capacidad, f"Capacidad incorrecta en API para sala {sala}"
 
 
@@ -68,6 +72,9 @@ def no_existen_reservas_sala(sala: str, api_client: httpx.Client) -> None:
             f"No se pudo eliminar reserva {item['id']}: {del_resp.status_code}"
         )
     response = api_client.get("/api/v1/reservas", params={"sala": sala})
+    assert response.status_code == 200, (
+        f"GET /api/v1/reservas tras limpieza falló para sala {sala}: {response.status_code}"
+    )
     assert response.json() == [], (
         f"No se pudieron limpiar todas las reservas de sala {sala}: {response.json()}"
     )
