@@ -24,3 +24,10 @@ class ReservaResponse(BaseModel):
     hora_fin: str
     asistentes: int
     proposito: str
+
+
+class SalaResponse(BaseModel):
+    """Sala de reunión con su capacidad máxima."""
+
+    sala: str = Field(..., min_length=1, max_length=10)
+    capacidad: int = Field(..., ge=1)

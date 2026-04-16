@@ -4,7 +4,7 @@ from datetime import date
 from typing import TypedDict
 from uuid import uuid4
 
-from src.models import ReservaCreate, ReservaResponse
+from src.models import ReservaCreate, ReservaResponse, SalaResponse
 
 SALAS: dict[str, int] = {"A": 4, "B": 8, "C": 20}
 HORA_INICIO_LABORAL = "08:00"
@@ -95,6 +95,13 @@ def crear_reserva(data: ReservaCreate) -> ReservaResponse:
     }
     _storage[reserva_id] = dato
     return _dato_a_response(dato)
+
+
+def listar_salas() -> list[SalaResponse]:
+    """Devuelve la lista de salas con sus capacidades máximas."""
+    return [
+        SalaResponse(sala=sala, capacidad=capacidad) for sala, capacidad in sorted(SALAS.items())
+    ]
 
 
 def listar_reservas(sala: str | None = None) -> list[ReservaResponse]:
