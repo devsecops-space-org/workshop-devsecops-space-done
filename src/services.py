@@ -12,6 +12,11 @@ HORA_FIN_LABORAL = "20:00"
 DURACION_MINIMA_MIN = 15
 DURACION_MAXIMA_MIN = 240
 
+_ERR_HORA_FIN_INVALIDA = "La hora de fin debe ser posterior a la hora de inicio"
+_ERR_SOLAPAMIENTO = "Existe un solapamiento de horario con otra reserva"
+_ERR_RESERVA_NO_ENCONTRADA = "Reserva '{}' no encontrada"
+_ERR_RESERVA_PASADA = "Solo se pueden cancelar reservas futuras"
+
 
 class ConflictoError(ValueError):
     """Error de conflicto de estado en la reserva."""
@@ -52,7 +57,7 @@ def crear_reserva(data: ReservaCreate) -> ReservaResponse:
     laboral_fin = _hora_a_minutos(HORA_FIN_LABORAL)
 
     if fin_min <= inicio_min:
-        raise ValueError("La hora de fin debe ser posterior a la hora de inicio")
+        raise ValueError(_ERR_HORA_FIN_INVALIDA)
 
     duracion = fin_min - inicio_min
     if duracion < DURACION_MINIMA_MIN:
@@ -76,7 +81,7 @@ def crear_reserva(data: ReservaCreate) -> ReservaResponse:
             r_inicio = _hora_a_minutos(reserva["hora_inicio"])
             r_fin = _hora_a_minutos(reserva["hora_fin"])
             if inicio_min < r_fin and fin_min > r_inicio:
-                raise ConflictoError("Existe un solapamiento de horario con otra reserva")
+                raise ConflictoError(_ERR_SOLAPAMIENTO)
 
     reserva_id = str(uuid4())
     dato: _ReservaDato = {
@@ -103,19 +108,19 @@ def listar_reservas(sala: str | None = None) -> list[ReservaResponse]:
 def obtener_reserva(reserva_id: str) -> ReservaResponse:
     """Obtiene una reserva por su ID."""
     if reserva_id not in _storage:
-        raise KeyError(f"Reserva '{reserva_id}' no encontrada")
+        raise KeyError(_ERR_RESERVA_NO_ENCONTRADA.format(reserva_id))
     return _dato_a_response(_storage[reserva_id])
 
 
 def cancelar_reserva(reserva_id: str) -> None:
     """Cancela una reserva futura."""
     if reserva_id not in _storage:
-        raise KeyError(f"Reserva '{reserva_id}' no encontrada")
+        raise KeyError(_ERR_RESERVA_NO_ENCONTRADA.format(reserva_id))
 
     reserva = _storage[reserva_id]
     fecha_reserva = date.fromisoformat(reserva["fecha"])
     if fecha_reserva <= date.today():
-        raise ConflictoError("Solo se pueden cancelar reservas futuras")
+        raise ConflictoError(_ERR_RESERVA_PASADA)
 
     del _storage[reserva_id]
 

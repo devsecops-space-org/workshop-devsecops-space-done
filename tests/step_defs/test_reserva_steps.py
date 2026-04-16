@@ -88,7 +88,6 @@ def existe_reserva(
     )
     assert response.status_code == 201
     context["reserva"] = response.json()
-    context["sala"] = sala
 
 
 # ── Cuandos ───────────────────────────────────────────────────────────────────
@@ -123,15 +122,6 @@ def crear_reserva(
         },
     )
     context["response"] = response
-    context["sala"] = sala
-    context["request_data"] = {
-        "sala": sala,
-        "fecha": fecha,
-        "hora_inicio": hora_inicio,
-        "hora_fin": hora_fin,
-        "asistentes": asistentes,
-        "proposito": proposito,
-    }
 
 
 @when(
