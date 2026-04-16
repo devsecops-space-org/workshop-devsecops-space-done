@@ -96,9 +96,11 @@ def existe_reserva(
     existentes = [
         r
         for r in listado.json()
-        if r["fecha"] == fecha
+        if r["sala"] == sala
+        and r["fecha"] == fecha
         and r["hora_inicio"] == hora_inicio
         and r["hora_fin"] == hora_fin
+        and r["asistentes"] == asistentes
         and r["proposito"] == proposito
     ]
     if existentes:
